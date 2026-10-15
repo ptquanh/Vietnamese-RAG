@@ -469,13 +469,21 @@ tiền huấn luyện chuyên biệt cho tiếng Việt so với biểu diễn �
 NER văn bản hành chính. Nói cách khác, biểu diễn ngữ cảnh đơn ngữ có thể nắm
 bắt tốt hơn các đặc trưng ngôn ngữ và cách diễn đạt chuyên biệt của miền này.
 
-\noindent\textbf{Nhận xét 2.} Với cùng backbone PhoBERT V2, CRF-H-SupCon
-đạt 98,65/97,21/97,92, thấp hơn CRF lần lượt 0,10/0,01/0,06 điểm P/R/F1;
-do đó lần chạy hiện tại chưa cho thấy lợi ích tổng thể của loss mới.
+\noindent\textbf{Đối chứng PhoBERT V2 + CRF.} So với XLM-R +
+CRF-H-SupCon trên cùng 10.278 mẫu, PhoBERT V2 + CRF cao hơn 0,86 điểm
+Precision, 0,55 điểm Recall và 0,70 điểm F1. Tuy nhiên, so sánh này đồng thời
+thay đổi backbone và hàm mất mát. Phép đối chứng chặt chẽ hơn trên cùng
+PhoBERT V2 cho thấy CRF đạt 98,75/97,22/97,98 về P/R/F1, cao hơn
+CRF-H-SupCon 0,10/0,01/0,06 điểm. Vì vậy, lần chạy hiện tại chưa cho thấy
+H-SupCon cải thiện F1 tổng thể trên PhoBERT V2.
 
-\noindent\textbf{Nhận xét 3.} ELECTRA đạt
-98,20/98,60/98,40 về P/R/F1. BamiBERT có F1 98,48\%, cao hơn 0,08 điểm
-về trị số, nhưng được đánh giá trên 5.162 mẫu nên không xếp hạng trực tiếp.
+\noindent\textbf{Cấu hình CRF-H-SupCon tốt nhất.} Trong các mô hình được
+đánh giá trên cùng 10.278 mẫu, ELECTRA + CRF-H-SupCon đạt F1 cao nhất
+(98,40\%), cao hơn PhoBERT V2 và XLM-R tương ứng 0,48 và 1,12 điểm F1.
+So với PhoBERT V2, ELECTRA giảm 0,45 điểm Precision nhưng tăng 1,39 điểm
+Recall, qua đó nâng F1 thêm 0,48 điểm. BamiBERT đạt trị số F1 lớn nhất toàn
+bảng (98,48\%), chỉ cao hơn ELECTRA 0,08 điểm, nhưng kết quả trên 5.162 mẫu
+chỉ mang tính mô tả và không được dùng để xếp hạng trực tiếp.
 
 \begin{figure}[t]
 \centering
@@ -672,7 +680,7 @@ kiến trúc Joint Optimization không tăng đường suy luận, và một gia
 ablation gồm cả so sánh Two-Stage--Joint để kiểm chứng giả thuyết về ranh
 giới dài và lớp hiếm.
 
-\IEEEtriggeratref{4}
+\IEEEtriggeratref{3}
 \bibliographystyle{IEEEtran}
 \renewcommand{\refname}{Tài liệu tham khảo}
 \bibliography{references}
