@@ -1,0 +1,60 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints*/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files & folders
+tmp/
+temp/
+scratch/
+
+# LaTeX auxiliary files (keep main.pdf and source files)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lot
+*.lof
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+
+# Whitelist research logs and papers
+!logs_contrastive/**
+!paper/main.pdf
+!paper/figures/**
