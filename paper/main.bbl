@@ -132,6 +132,14 @@ Q.~Guo, Y.~Dong, L.~Tian, Z.~Kang, Y.~Zhang, and S.~Wang, ``{BANER}:
   \url{https://aclanthology.org/2025.coling-main.691/}
 \BIBentrySTDinterwordspacing
 
+\bibitem{yang2026cuamner}
+\BIBentryALTinterwordspacing
+X.~Yang, R.~Zhao, and H.~Li, ``A contrastive and uncertainty-aware framework
+  for multimodal named entity recognition,'' \emph{Electronics}, vol.~15,
+  no.~13, p. 2770, 2026. [Online]. Available:
+  \url{https://www.mdpi.com/2079-9292/15/13/2770}
+\BIBentrySTDinterwordspacing
+
 \bibitem{la2025papnerdata}
 \BIBentryALTinterwordspacing
 D.-D. La, T.-B. Tran, N.-H. Du, N.-H. Dang, T.-N. Phung, and V.-K. Tran,

@@ -1,0 +1,28 @@
+Start TEST process...
+Loading checkpoint from 'outputs/phobert_v2_crf_hierarchical_supcon/best_model.pt' on device 'cuda'...
+Running evaluation on test set (10278 samples)...
+Processed 243616 tokens with 20979 phrases; Found: 20672 phrases; correct: 20393.
+Accuracy: 0.9625; (without `O` tag)
+Accuracy: 0.9928;  Precision: 0.9865; Recall: 0.9721; F1-score: 0.9792
+               CQ: Precision: 0.9874; Recall: 0.9666; F1-score: 0.9769  7157
+               NG: Precision: 0.9995; Recall: 0.9995; F1-score: 0.9995  4021
+               SL: Precision: 0.9808; Recall: 0.9671; F1-score: 0.9739  1617
+             VBPL: Precision: 0.9633; Recall: 0.9831; F1-score: 0.9731  845
+               ĐT: Precision: 0.9822; Recall: 0.9621; F1-score: 0.9721  7032
+              precision    recall  f1-score   support
+
+           O     0.9935    0.9984    0.9959    205461
+        B-CQ     0.9917    0.9690    0.9802      7311
+        I-CQ     0.9580    0.8524    0.9022      2677
+        B-ĐT     0.9956    0.9746    0.9850      7179
+        I-ĐT     0.9874    0.9120    0.9482      6003
+      B-VBPL     0.9703    0.9855    0.9778       828
+      I-VBPL     0.9729    0.9989    0.9857      2801
+        B-NG     0.9998    0.9998    0.9998      4021
+        I-NG     1.0000    0.9995    0.9998      4023
+        B-SL     0.9925    0.9744    0.9834      1638
+        I-SL     0.9808    0.9773    0.9791      1674
+
+    accuracy                         0.9928    243616
+   macro avg     0.9857    0.9674    0.9761    243616
+weighted avg     0.9927    0.9928    0.9927    243616

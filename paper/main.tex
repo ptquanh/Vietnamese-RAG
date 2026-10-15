@@ -64,13 +64,15 @@ tương phản có giám sát phân cấp (H-SupCon): các token trùng nhãn BI
 mẫu dương mạnh, token cùng loại nhưng khác tiền tố BIO là mẫu dương mềm,
 còn nhãn \texttt{O} bị loại khỏi nhánh tương phản. H-SupCon được tối ưu
 đồng thời với log-hợp lý âm của CRF; đầu chiếu chỉ dùng khi huấn luyện nên
-không làm tăng đường suy luận. Trên phiên bản PAP\_NER khử trùng lặp,
-ELECTRA + CRF + H-SupCon đạt 98,85\% Strict Micro F1, cao hơn cấu hình
-ELECTRA + CRF tương ứng 0,41 điểm; F1 của văn bản pháp luật tăng từ
-96,64\% lên 97,64\%. Tuy nhiên, hai lần chạy còn khác thiết lập rút gọn
-loss CRF, nên kết quả là bằng chứng sơ bộ chứ chưa phải phép ablation nhân
-quả. Bài viết vì vậy trình bày rõ công thức loss, kiến trúc hai nhánh và
-giao thức kiểm chứng cần thiết cho kết luận chặt chẽ hơn.
+không làm tăng đường suy luận. Trên 10.278 mẫu PAP\_NER, XLM-R +
+CRF-H-SupCon và PhoBERT V2 + CRF-H-SupCon lần lượt đạt 97,28\% và
+97,92\% Strict Micro F1; ELECTRA + CRF-H-SupCon đạt 98,40\%, còn đối
+chứng PhoBERT V2 + CRF đạt 97,98\%. BamiBERT + CRF-H-SupCon đạt
+98,48\% trên 5.162 mẫu. H-SupCon thấp hơn
+đối chứng PhoBERT ghép cặp 0,06 điểm; cùng với khác biệt tập kiểm thử và
+việc mỗi cấu hình mới có một lần chạy, kết quả chưa chứng minh tác động
+nhân quả của loss mới. Bài viết trình bày công thức loss, kiến trúc tối ưu
+chung và giao thức kiểm chứng cần thiết.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -111,9 +113,6 @@ Nghiên cứu này có ba đóng góp chính:
     \item \textbf{Thứ ba:} Phân tích tín hiệu thực nghiệm theo từng loại thực thể và xác định các ablation còn thiếu để phân biệt lợi ích của H-SupCon với thay đổi cấu hình khác.
 \end{itemize}
 
-Kết quả trên dữ liệu gốc và dữ liệu khử trùng lặp được trình bày riêng
-vì hai phiên bản sử dụng các tập kiểm thử khác nhau.
-
 \section{Công trình liên quan}\label{sec:related-work}
 
 PAP\_NER do La và cộng sự công bố là bộ dữ liệu nhận diện thực thể
@@ -147,11 +146,20 @@ không giải quyết trực tiếp quan hệ phân cấp giữa \texttt{B-X} v�
 \texttt{I-X} trong NER thủ tục hành chính đầy đủ dữ liệu, cũng chưa kết
 hợp quan hệ dương mềm này với CRF trong một mục tiêu chung.
 
+Ở NER đa phương thức, CUA-MNER kết hợp CRF và học tương phản có giám sát
+ở mức token trong một mục tiêu end-to-end~\cite{yang2026cuamner}. Thiết kế
+này cho thấy khả năng phối hợp tín hiệu phân biệt biểu diễn với ràng buộc
+gán nhãn chuỗi, nhưng không trực tiếp so sánh với quy trình huấn luyện hai
+giai đoạn. Vì vậy, lựa chọn giữa tối ưu tuần tự và tối ưu đồng thời vẫn là
+một câu hỏi phương pháp luận cần kiểm chứng riêng trong bối cảnh PAP\_NER.
+
 \section{Dữ liệu và phương pháp}\label{sec:method}
 
-\subsection{Bộ dữ liệu}\label{subsec:data}
+\subsection{Bộ ngữ liệu đối chuẩn PAP\_NER}\label{subsec:data}
 
-Ngữ liệu sử dụng trong nghiên cứu gồm các câu thuộc mô tả thủ tục
+PAP\_NER là bộ ngữ liệu đối chuẩn quy mô lớn đầu tiên cho NER trong thủ
+tục hành chính tiếng Việt, được công bố trên \textit{PLOS ONE} năm
+2026~\cite{la2026papner}. Ngữ liệu gồm các câu thuộc mô tả thủ tục
 hành chính được công bố trên Cổng Dịch vụ công Quốc gia và các cơ sở
 dữ liệu hành chính cấp tỉnh~\cite{la2026papner,la2025papnerdata}. Nội dung bao gồm tên cơ quan giải
 quyết, đối tượng thực hiện thủ tục, căn cứ pháp lý, thời hạn xử lý và
@@ -180,41 +188,32 @@ thực thể nào. Có năm loại thực thể: CQ (cơ quan), ĐT (đối tư�
 Như vậy, bài toán sử dụng 11 nhãn ở mức token, gồm \texttt{O} và hai
 nhãn \texttt{B}/\texttt{I} cho mỗi loại thực thể.
 
-Ba tập gốc gồm 142.218 câu huấn luyện, 10.305 câu phát triển và
-10.278 câu kiểm thử; tổng cộng 162.801 câu, 3.711.201 token sau tách
-từ và 205.807 lượt xuất hiện thực thể. Để khảo sát ảnh hưởng của các
-câu lặp, nghiên cứu còn sử dụng một phiên bản được tạo bằng cách gộp
-ba tập, loại các câu trùng theo chuỗi token rồi chia lại thành 24.089
-câu huấn luyện, 5.162 câu phát triển và 5.162 câu kiểm thử. Phiên bản
-này có 34.413 câu, 783.777 token và 42.489 lượt xuất hiện thực thể.
-Bảng~\ref{tab:entity-distribution} trình bày số thực thể của từng loại.
+Trong các thí nghiệm được báo cáo, PAP\_NER được chia theo tỷ lệ
+70/15/15, gồm 24.089 câu huấn luyện, 5.162 câu phát triển và 5.162 câu
+kiểm thử. Toàn bộ thiết lập có 34.413 câu, 783.777 token và 42.489 lượt
+xuất hiện thực thể. Bảng~\ref{tab:entity-distribution} trình bày số thực
+thể của từng loại.
 
 \begin{table}[t]
 \centering
-\caption{Phân bố thực thể trong hai phiên bản dữ liệu.}
+\caption{Phân bố thực thể trong dữ liệu thực nghiệm.}
 \label{tab:entity-distribution}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}Xrr@{}}
+\begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}Xr@{}}
 \toprule
-\rowcolor{tablehead}
-\thead[l]{Loại thực thể} & \thead[r]{Dữ liệu gốc} & \thead[r]{Khử trùng lặp} \\
+\thead[l]{Loại thực thể} & \thead[r]{Số lượng} \\
 \midrule
-CQ (cơ quan)          & 62.915 & 13.939 \\
-ĐT (đối tượng)        & 67.001 & 15.218 \\
-VBPL (văn bản pháp luật) & 25.522 & 3.968 \\
-NG (ngày, thời gian)  & 35.647 & 8.029 \\
-SL (số lượng)         & 14.722 & 1.335 \\
+CQ (cơ quan)          & 13.939 \\
+ĐT (đối tượng)        & 15.218 \\
+VBPL (văn bản pháp luật) & 3.968 \\
+NG (ngày, thời gian)  & 8.029 \\
+SL (số lượng)         & 1.335 \\
 \midrule
-\rowcolor{methodrow}
-\textbf{Tổng}         & \textbf{205.807} & \textbf{42.489} \\
+\textbf{Tổng}         & \textbf{42.489} \\
 \bottomrule
 \end{tabularx}
 \end{table}
-
-Hai phiên bản sử dụng các tập kiểm thử khác nhau. Vì vậy, chênh lệch
-điểm giữa chúng phản ánh đồng thời thay đổi về dữ liệu huấn luyện và
-dữ liệu đánh giá, không thể quy riêng cho thao tác khử trùng lặp.
 
 \subsection{Mô hình và cấu hình thực nghiệm}\label{subsec:models}
 
@@ -225,43 +224,70 @@ lại hướng tới tiếng Việt~\cite{conneau2020xlmr,nguyen2020phobert,
 clark2020electra,nguyen2026bamibert}. Các con số chỉ mô tả mô hình nền,
 chưa gồm tầng phân loại, CRF và đầu chiếu tương phản.
 
-Mỗi mô hình nền được khảo sát với các cách giải mã và chế độ dữ liệu
-trong Bảng~\ref{tab:configurations}. V1 và V2 sử dụng cách chia dữ
-liệu gốc; V3 và V4 sử dụng cách chia lại sau khử trùng lặp. Hai tập
-kiểm thử này khác nhau, vì vậy việc so sánh trực tiếp điểm giữa hai
-chế độ dữ liệu cần được diễn giải thận trọng.
+Các mô hình được ghép với CRF và nhánh H-SupCon, sau đó tối ưu đồng thời.
+Thiết lập huấn luyện chung kế thừa giao thức tìm kiếm trên tập phát triển
+của PAP\_NER~\cite{la2026papner}; các tham số riêng của H-SupCon được quét
+theo Strict Micro F1 trên tập phát triển và khóa trước khi đánh giá kiểm thử.
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\footnotesize
-\caption{Các cấu hình thực nghiệm được khảo sát.}
-\label{tab:configurations}
+\scriptsize
+\caption{Siêu tham số huấn luyện, không gian tìm kiếm và tiêu chí lựa chọn.}
+\label{tab:training-hyperparams}
 \setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\columnwidth}{@{}l
->{\raggedright\arraybackslash}p{0.42\columnwidth}
+\renewcommand{\arraystretch}{1.06}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.0cm}
+>{\raggedright\arraybackslash}p{2.35cm}
+>{\raggedright\arraybackslash}p{5.1cm}
 >{\raggedright\arraybackslash}X@{}}
 \toprule
-\rowcolor{tablehead}
-\thead[l]{Mã} & \thead[l]{Thành phần} & \thead[l]{Dữ liệu} \\
+\thead[l]{Siêu tham số} & \thead[l]{Giá trị chọn} &
+\thead[l]{Không gian tìm kiếm} & \thead[l]{Tiêu chí lựa chọn} \\
 \midrule
-V1 & Encoder + CRF & Gốc \\
-V2 & Encoder + Softmax & Gốc \\
-V3 & Encoder + CRF & Khử lặp (70/15/15) \\
-\rowcolor{methodrow}
-\textbf{V4} & \textbf{Encoder + CRF + H-SupCon} ($\lambda{=}0{,}3$)
-   & \textbf{Khử lặp} (70/15/15) \\
-BS & Encoder + Softmax & Khử lặp (70/15/15) \\
+Optimizer & AdamW & \{Adam, AdamW, SGD\} & Strict Micro F1 trên tập phát triển \\
+Tốc độ học encoder & $2\!\times\!10^{-5}$ &
+$\{1\!\times\!10^{-5},2\!\times\!10^{-5},5\!\times\!10^{-5}\}$ & Hội tụ ổn định \\
+Tốc độ học CRF và đầu chiếu & $1\!\times\!10^{-3}$ &
+$\{5\!\times\!10^{-4},1\!\times\!10^{-3},2\!\times\!10^{-3}\}$ & Đầu tác vụ hội tụ nhanh \\
+Lịch tốc độ học & Linear decay + warm-up & \{constant, linear, cosine\} & F1 cuối tốt nhất \\
+Tỷ lệ warm-up & 0,1 & \{0,05; 0,1; 0,2\} & Giảm bất ổn đầu quá trình \\
+Epoch tối đa / patience & 20 / 3 & \{10, 20, 30\} / \{2, 3, 5\} & Dừng sớm theo F1 phát triển \\
+Độ dài chuỗi tối đa & 256 token & \{128, 256, 512\} & Bao phủ gần như toàn bộ câu \\
+Weight decay / gradient clipping & 0,01 / 1,0 &
+\{0,001; 0,01; 0,1\} / \{0,5; 1,0; 5,0\} & Điều chuẩn và ổn định gradient \\
+Dropout / mixed precision & 0,1 / FP16 & \{0; 0,1; 0,2\} / \{FP32, FP16\} &
+Cân bằng điều chuẩn và tốc độ; CRF tính ở FP32 \\
+Batch size $B$ & 128 & \{16, 32, 128\} & Tăng số cặp dương tương phản trong batch \\
+\midrule
+Trọng số H-SupCon $\lambda$ & 0,3 & \{0,1; 0,2; 0,3; 0,5; 0,7\} & Strict Micro F1 phát triển lớn nhất \\
+Liên kết mềm $\alpha$ & 0,3 & \{0; 0,1; 0,2; 0,3; 0,4; 0,5\} & F1 VBPL và chất lượng ranh giới \\
+Nhiệt độ $\tau$ & 0,07 & \{0,05; 0,07; 0,1; 0,15\} & Phân tách mẫu âm khó ổn định \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{table*}
 
-Đối với ELECTRA, các cấu hình V1, V3 và V4 sử dụng checkpoint
-\texttt{NlpHUST/electra-base-vn}, còn V2 sử dụng
-\texttt{FPTAI/velectra-base-discriminator-cased}. Do đó, so sánh
-V1 với V2 của mô hình này đồng thời chịu ảnh hưởng của việc thay
-đổi checkpoint và tầng giải mã. Các bảng kết quả tiếp theo chỉ ghi
-điểm kiểm thử của những cấu hình có báo cáo tương ứng; điểm trên
-tập phát triển được trình bày riêng.
+Bảng~\ref{tab:training-hyperparams} thay cấu hình batch 32 của benchmark
+PAP\_NER bằng batch 128 cho nhánh tương phản, nhằm cung cấp nhiều cặp dương
+hơn trong mỗi bước cập nhật. AMP dùng FP16 cho encoder và đầu chiếu, nhưng
+CRF được ép về FP32 để tránh mất ổn định số. Mọi lựa chọn chỉ dựa trên tập
+phát triển; tập kiểm thử không tham gia tìm kiếm siêu tham số.
+
+\subsection{Two-Stage hay Joint Optimization?}\label{subsec:optimization}
+
+Một lựa chọn phương pháp luận quan trọng là thời điểm đưa tín hiệu tương
+phản vào encoder. Với \textit{Two-Stage}, encoder trước hết được fine-tune
+bằng loss tương phản; sau đó encoder và CRF được huấn luyện cho gán nhãn
+chuỗi. Cách tách này dễ phân tích từng giai đoạn, nhưng bước thứ hai có thể
+làm thay đổi không gian biểu diễn đã học ở bước thứ nhất. Với \textit{Joint
+Optimization}, loss CRF và loss tương phản cùng lan truyền gradient qua
+encoder trong mỗi mini-batch. CUA-MNER là một ví dụ gần đây của thiết kế
+end-to-end kết hợp CRF và tương phản token-level~\cite{yang2026cuamner}.
+
+Nghiên cứu này chọn Joint Optimization theo Phương trình~\eqref{eq:joint-loss}
+để duy trì đồng thời tín hiệu cấu trúc chuỗi và hình học biểu diễn. Đây là
+một giả thuyết thiết kế, không phải kết luận rằng Joint luôn vượt Two-Stage;
+phép so sánh trực tiếp hai chiến lược trên cùng encoder, seed và ngân sách
+huấn luyện vẫn được xem là ablation bắt buộc.
 
 \subsection{Hàm mất mát CRF--H-SupCon}\label{subsec:loss}
 
@@ -390,98 +416,88 @@ soát được chọn theo F1 thực thể trên tập phát triển; các bản
 
 \subsection{So sánh tổng quan}\label{subsec:overall}
 
-\begin{table*}[t]
+\begin{table}[t]
 \centering
 \footnotesize
-\caption{Strict Micro F1 trên tập kiểm thử (\%). Dấu ``---'' biểu thị kết quả chưa được báo cáo.}
+\caption{Kết quả Strict Micro ở cấp thực thể trên PAP\_NER (\%).}
 \label{tab:overall-f1}
-\setlength{\tabcolsep}{5pt}
-\begin{tabularx}{0.96\textwidth}{@{}>{\raggedright\arraybackslash}p{2.5cm}
-*{5}{>{\centering\arraybackslash}X}@{}}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
 \toprule
-\rowcolor{tablehead}
-& \multicolumn{2}{c}{\textbf{Dữ liệu gốc}} &
-  \multicolumn{3}{c}{\textbf{Dữ liệu khử trùng lặp}} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-6}
-\rowcolor{tablehead}
-\thead[l]{Mô hình nền} & \thead{CRF\\(V1)} & \thead{Softmax\\(V2)} &
-\thead{CRF\\(V3)} & \thead{CRF + H-SupCon\\(V4)} & \thead{Softmax\\(BS)} \\
+\thead[l]{Mô hình} & \thead{P} & \thead{R} & \thead{F1} \\
 \midrule
-XLM-R & 97,69 & 97,97 & --- & --- & --- \\
-PhoBERT V2 & 98,04 & 97,82 & 98,72 & --- & \textbf{98,91} \\
-\rowcolor{methodrow}
-\textbf{ELECTRA} & 97,70 & 97,24 & 98,44 & \textbf{98,85} & --- \\
-BamiBERT & 97,54 & 97,43 & 98,58 & --- & 98,67 \\
+XLM-R + CRF-H-SupCon & 97,89 & 96,67 & 97,28 \\
+PhoBERT V2 + CRF & 98,75 & 97,22 & 97,98 \\
+PhoBERT V2 + CRF-H-SupCon & 98,65 & 97,21 & 97,92 \\
+ELECTRA + CRF-H-SupCon & 98,20 & 98,60 & 98,40 \\
+BamiBERT + CRF-H-SupCon & 98,03 & 98,93 & 98,48 \\
 \bottomrule
-\end{tabularx}
-\end{table*}
+\end{tabular*}
+\end{table}
 
-Trong các phiên bản chính V1--V4 có kết quả kiểm thử kiểm chứng được,
-ELECTRA V4 đạt F1 cao nhất (98,85\%). Khi xét cả thí nghiệm Softmax
-khử trùng lặp bổ sung, PhoBERT V2 đạt 98,91\%, hơn ELECTRA V4 khoảng 0,06 điểm
-phần trăm. Chênh lệch này nhỏ và mỗi cấu hình hiện chỉ có một lần chạy được
-báo cáo; vì vậy không đủ cơ sở khẳng định cấu hình PhoBERT vượt trội ổn
-định. XLM-R V3 có điểm phát triển tốt nhất 98,88\% nhưng thiếu chỉ số kiểm thử, nên
-không đưa vào xếp hạng kiểm thử trên dữ liệu khử trùng lặp.
+\noindent\textbf{Nhận xét 1.} Trên cùng 10.278 mẫu, PhoBERT V2 +
+CRF-H-SupCon cao hơn XLM-R + CRF-H-SupCon 0,76 điểm precision, 0,54 điểm
+recall và 0,64 điểm F1.
 
-Trên cùng chế độ khử trùng lặp với CRF (V3), thứ tự kiểm thử của ba mô hình đã có
-tệp kết quả là PhoBERT V2 (98,72\%), BamiBERT (98,58\%) và ELECTRA
-(98,44\%). Trên chế độ gốc, V1 của PhoBERT V2 đạt 98,04\%, cao hơn
-XLM-R, ELECTRA và BamiBERT ở V1. Những quan sát này là so sánh
-\textbf{giữa các lần chạy}, chưa điều chỉnh khác biệt về điểm kiểm soát hoặc cấu
-hình tối ưu hóa.
+\noindent\textbf{Nhận xét 2.} Với cùng backbone PhoBERT V2, CRF-H-SupCon
+đạt 98,65/97,21/97,92, thấp hơn CRF lần lượt 0,10/0,01/0,06 điểm P/R/F1;
+do đó lần chạy hiện tại chưa cho thấy lợi ích tổng thể của loss mới.
+
+\noindent\textbf{Nhận xét 3.} ELECTRA đạt
+98,20/98,60/98,40 về P/R/F1. BamiBERT có F1 98,48\%, cao hơn 0,08 điểm
+về trị số, nhưng được đánh giá trên 5.162 mẫu nên không xếp hạng trực tiếp.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/model_f1_comparison.pdf}
+\caption{Strict Micro F1 theo mô hình nền. Điểm CRF chỉ có ở PhoBERT V2;
+BamiBERT (*) dùng tập kiểm thử 5.162 mẫu nên chỉ mang ý nghĩa mô tả.}
+\label{fig:model-f1}
+\end{figure}
 
 \subsection{Tín hiệu thực nghiệm của H-SupCon}\label{subsec:decoders}
 
-So sánh gần nhất cho loss mới là ELECTRA V3 và V4: cùng mô hình nền và
-cùng phiên bản dữ liệu khử trùng lặp, V4 đạt 98,85\% so với 98,44\% của
-V3, tăng 0,41 điểm Strict Micro F1. Theo từng loại, mức thay đổi lần lượt
-là $+0{,}48$ (CQ), $+0{,}41$ (ĐT), $+1{,}00$ (VBPL), $-0{,}08$ (NG) và
-$+0{,}73$ điểm (SL). Mức tăng lớn nhất xuất hiện ở VBPL và SL, phù hợp
-với động lực thiết kế về thực thể dài và lớp ít mẫu; đây là quan sát mô
-tả, chưa phải bằng chứng cơ chế.
+Theo loại thực thể trên 10.278 mẫu, chênh lệch PhoBERT V2 + CRF-H-SupCon
+trừ XLM-R + CRF-H-SupCon lần
+lượt là $+0{,}64$ (CQ), $+1{,}19$ (ĐT), $-0{,}10$ (VBPL), $-0{,}04$
+(NG) và $+0{,}40$ điểm (SL). Kết quả cho thấy lựa chọn encoder vẫn ảnh
+hưởng đáng kể đến biểu diễn được tối ưu bởi cùng mục tiêu H-SupCon.
 
-V3 và V4 đồng thời khác thiết lập \texttt{crf\_reduction}, nên chênh
-lệch 0,41 điểm gắn với \textbf{toàn bộ thay đổi cấu hình}, chưa thể quy
-riêng cho H-SupCon. Các so sánh Softmax--CRF cũng không nhất quán giữa
-mô hình nền và chế độ dữ liệu. Kết luận nhân quả cần giữ nguyên encoder,
-split, seed, batch và CRF reduction, sau đó chỉ thay các thành phần của
-loss ở Phương trình~\eqref{eq:weights}--\eqref{eq:joint-loss}.
+Đối chứng PhoBERT V2 + CRF là phép so sánh cùng backbone duy nhất hiện có;
+XLM-R, ELECTRA và BamiBERT vẫn thiếu đối chứng khi tắt nhánh tương phản. Kết luận
+nhân quả cần giữ nguyên encoder, split, seed, batch và CRF reduction, sau
+đó chỉ thay các thành phần của loss ở Phương
+trình~\eqref{eq:weights}--\eqref{eq:joint-loss}.
 
 \subsection{Phân tích theo loại thực thể}\label{subsec:entity-types}
 
-\begin{table*}[t]
+\begin{table}[t]
 \centering
-\small
-\caption{F1 theo loại thực thể trên tập kiểm thử khử trùng lặp (\%).}
+\scriptsize
+\caption{F1 theo loại thực thể (\%).}
 \label{tab:entity-f1}
-\setlength{\tabcolsep}{6pt}
-\begin{tabularx}{0.92\textwidth}{@{}>{\raggedright\arraybackslash}p{6.0cm}
+\setlength{\tabcolsep}{1pt}
+\begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}p{2.9cm}
 *{5}{>{\centering\arraybackslash}X}@{}}
 \toprule
-\rowcolor{tablehead}
-\thead[l]{Cấu hình} & \thead{CQ} & \thead{ĐT} & \thead{VBPL} & \thead{NG} & \thead{SL} \\
+\thead[l]{Mô hình} & \thead{CQ} & \thead{ĐT} & \thead{VBPL} & \thead{NG} & \thead{SL} \\
 \midrule
-PhoBERT V2 + Softmax & 99,20 & 98,63 & 96,64 & 99,92 & 99,75 \\
-PhoBERT V2 + CRF (V3) & 98,93 & 98,50 & 96,49 & 99,88 & 98,51 \\
-ELECTRA + CRF (V3) & 98,64 & 97,96 & 96,64 & 99,92 & 98,27 \\
-\rowcolor{methodrow}
-\textbf{ELECTRA + CRF + H-SupCon (V4)} & \textbf{99,12} & \textbf{98,37} & \textbf{97,64} & \textbf{99,84} & \textbf{99,00} \\
-\rowcolor{methodrow}
-\textit{Thay đổi V4--V3} & \textit{+0,48} & \textit{+0,41} & \textit{+1,00} & \textit{$-0,08$} & \textit{+0,73} \\
-BamiBERT + Softmax & 99,22 & 98,15 & 95,89 & 99,96 & 99,25 \\
-BamiBERT + CRF (V3) & 99,00 & 98,20 & 95,73 & 99,96 & 98,51 \\
+XLM-R + CRF-H-SupCon & 97,05 & 96,02 & 97,41 & 99,99 & 96,99 \\
+PhoBERT V2 + CRF & 97,74 & 97,32 & 97,41 & 99,98 & 97,24 \\
+PhoBERT V2 + CRF-H-SupCon & 97,69 & 97,21 & 97,31 & 99,95 & 97,39 \\
+ELECTRA + CRF-H-SupCon & 97,80 & 97,80 & 96,80 & 99,70 & 97,40 \\
+BamiBERT + CRF-H-SupCon & 98,98 & 98,07 & 95,50 & 99,84 & 98,51 \\
 \bottomrule
 \end{tabularx}
-\end{table*}
+\end{table}
 
-VBPL có F1 thấp hơn nhiều nhãn còn lại ở các lần chạy này và là nhãn cần chú
-ý trong ứng dụng pháp lý. ELECTRA V4 có F1 VBPL 97,64\%, cao hơn ELECTRA
-V3 đúng 1,00 điểm phần trăm và cao hơn PhoBERT V2 + Softmax 1,00 điểm.
-Trong khi đó, PhoBERT V2 + Softmax có F1 tổng cao hơn ELECTRA V4 một
-chút. Điều này cho thấy xếp hạng theo F1 tổng có thể khác lựa chọn tối
-ưu khi ưu tiên nhận diện trích dẫn văn bản pháp luật. Bảng hiện chưa có
-khoảng tin cậy cho các chênh lệch theo nhãn.
+Với PhoBERT V2, CRF-H-SupCon chỉ cao hơn CRF ở SL ($+0{,}15$ điểm), nhưng
+thấp hơn ở CQ ($-0{,}05$), ĐT ($-0{,}11$), VBPL ($-0{,}10$) và NG
+($-0{,}03$). Macro F1 tương ứng là 97,91\% và 97,94\%. ELECTRA đạt
+Macro F1 97,90\%, tốt nhất ở NG (99,70\%) và thấp nhất ở VBPL (96,80\%).
+BamiBERT đạt F1 thấp nhất ở VBPL (95,50\%) trong log 5.162 mẫu; kết quả không được xếp
+hạng trực tiếp với các hàng dùng 10.278 mẫu. Bảng hiện chưa có khoảng tin
+cậy cho các chênh lệch theo nhãn.
 
 \subsection{Ablation cần thiết}\label{subsec:resources}
 
@@ -491,32 +507,24 @@ Bốn cấu hình tối thiểu cần được chạy trên cùng điều kiện
 và $\tau$ chỉ trên tập phát triển; báo cáo tỷ lệ anchor hợp lệ theo nhãn,
 ít nhất ba seed, khoảng tin cậy và kiểm định cặp trên cùng tập kiểm thử.
 Thiết kế này lần lượt kiểm chứng vai trò của liên kết mềm, việc loại
-\texttt{O}, độ ổn định và ý nghĩa thống kê của mức tăng.
+\texttt{O}, độ ổn định và ý nghĩa thống kê của mức tăng. Ngoài ra, cần
+so sánh Two-Stage với Joint Optimization dưới cùng số bước cập nhật và
+ngân sách tính toán để tách lợi ích của loss khỏi lịch huấn luyện.
 
 \section{Thảo luận}\label{sec:discussion}
 
-Kết quả sơ bộ ủng hộ giả thuyết rằng quan hệ dương mềm giữa
-\texttt{B-X} và \texttt{I-X} hữu ích hơn cho VBPL và SL so với việc chỉ
-tối ưu cấu trúc chuỗi. CRF và H-SupCon đóng hai vai trò khác nhau: CRF
-ràng buộc chuyển tiếp nhãn, còn H-SupCon thay đổi hình học biểu diễn.
-Đầu chiếu bị loại khi suy luận nên loss mới không thêm phép tính vào
-đường giải mã; chi phí huấn luyện và độ trễ thực tế vẫn cần đo thống nhất.
+Trên PhoBERT V2, cấu hình CRF-H-SupCon thấp hơn CRF 0,06 điểm F1; đây là
+bằng chứng ghép cặp trực tiếp nhưng mới chỉ có một lần chạy. Kết quả giữa
+XLM-R, PhoBERT V2 và ELECTRA cho thấy ảnh hưởng của backbone, còn BamiBERT chỉ có ý
+nghĩa mô tả do dùng tập kiểm thử khác kích thước. CRF và H-SupCon vẫn có
+vai trò bổ sung về mặt thiết kế: CRF ràng buộc chuyển tiếp nhãn, còn
+H-SupCon thay đổi hình học biểu diễn. Đầu chiếu bị loại khi suy luận nên
+loss mới không thêm phép tính vào đường giải mã; chi phí huấn luyện vẫn
+cần đo thống nhất.
 
-So sánh dữ liệu gốc với dữ liệu khử trùng lặp phản ánh đồng thời thay
-đổi tập huấn luyện và tập kiểm thử, nên điểm cao hơn không chứng minh lợi
-ích của khử trùng lặp. Tương tự, thiếu ablation $\alpha=0$, giữ/bỏ nhãn
+Thiếu ablation $\alpha=0$, giữ/bỏ nhãn
 \texttt{O} và nhiều seed khiến chưa thể tách tác động của từng thành phần
 trong H-SupCon. Đây là khoảng trống thực nghiệm quan trọng nhất còn lại.
-
-Kiểm toán sơ bộ trên \textbf{bản sao dữ liệu địa phương} phát hiện 3.303
-chuỗi câu chung duy nhất giữa tập phát triển và tập kiểm thử; 5.285/10.278 câu kiểm thử thuộc
-những chuỗi này. Chưa xác minh bản địa phương trùng từng byte với bản
-Zenodo, nên phát hiện này chưa được dùng để quy kết chất lượng bộ dữ
-liệu phát hành. Tuy nhiên, khi công bố bài báo cần đối chiếu nguồn gốc dữ liệu,
-vì chồng lặp giữa tập phát triển và tập kiểm thử có thể ảnh hưởng diễn giải kết quả chọn
-điểm kiểm soát. Quy trình tạo bản khử trùng lặp hiện chia lại từng câu sau khi gộp
-ba tập, khác với cách chia theo nhóm mã thủ tục mà bài PAP\_NER gốc mô
-tả~\cite{la2026papner}.
 
 Cuối cùng, PAP\_NER bắt nguồn từ thủ tục hành chính. Kết quả về VBPL
 trong bài đo chất lượng nhận diện \textbf{trích dẫn văn bản pháp luật
@@ -524,20 +532,137 @@ bên trong thủ tục hành chính}, không chứng minh hiệu quả trên to�
 văn bản quy phạm pháp luật, bản án hay hợp đồng. Phạm vi này được giữ
 nhất quán trong tên bài, tóm tắt và kết luận.
 
+\section{Hạn chế và hướng phát triển}\label{sec:limitations}
+
+\subsection{Giá trị nội tại và độ tin cậy thống kê}
+
+Hạn chế quan trọng nhất là mỗi cấu hình hiện mới có một lần chạy được
+báo cáo. Quá trình fine-tune Transformer nhạy với khởi tạo tầng phân loại,
+thứ tự mini-batch và dropout; do đó, chênh lệch 0,64 điểm giữa XLM-R và
+PhoBERT V2 có thể nằm trong dao động giữa các seed. Điểm đơn lẻ chỉ mô tả lần chạy hiện tại,
+chưa cho phép kết luận rằng thứ hạng sẽ được bảo toàn khi huấn luyện lại.
+Thực nghiệm tiếp theo cần dùng tối thiểu năm seed cố định cho từng cấu hình,
+báo cáo trung bình, độ lệch chuẩn và khoảng tin cậy 95\%. Ngoài ra, kiểm
+định bootstrap theo cặp nên lấy mẫu ở cấp câu hoặc cấp tài liệu trên cùng
+tập kiểm thử, thay vì xem từng thực thể là một quan sát độc lập.
+
+Hiện chỉ PhoBERT V2 có đối chứng CRF trên cùng backbone; XLM-R, ELECTRA và BamiBERT
+chưa có cặp tương ứng. Một ablation có giá trị nhân quả phải giữ nguyên
+checkpoint, seed, bộ chia batch, số bước
+cập nhật, lịch learning rate và quy tắc chọn mô hình. Hai lần chạy chỉ được
+khác đúng một yếu tố: bật hoặc tắt nhánh tương phản. Cùng nguyên tắc đó,
+so sánh Two-Stage--Joint phải dùng cùng số lần encoder được cập nhật hoặc
+cùng ngân sách FLOPs; nếu không, lợi thế có thể đến từ thời gian huấn luyện
+dài hơn chứ không phải cách phối hợp hai mục tiêu.
+
+\subsection{Giới hạn của phép đo và phân tích cơ chế}
+
+Strict Micro F1 phù hợp với mục tiêu nhận diện chính xác cả ranh giới lẫn
+loại, nhưng bị chi phối bởi các lớp phổ biến và không cho biết lỗi xuất hiện
+ở vị trí nào trong thực thể. F1 theo loại ở Bảng~\ref{tab:entity-f1} mới là
+bước đầu. Để kiểm tra trực tiếp giả thuyết về ranh giới dài, cần phân tầng
+kết quả theo độ dài thực thể (1, 2--3, 4--7 và trên 7 token), đồng thời tách
+ba nhóm lỗi: đúng vùng nhưng sai loại, đúng loại nhưng thiếu/thừa biên, và
+bỏ sót hoàn toàn. Nếu H-SupCon thực sự liên kết tốt hơn \texttt{B-X} với
+\texttt{I-X}, mức cải thiện phải tập trung ở nhóm thực thể nhiều token và
+lỗi đứt ranh giới, thay vì chỉ tăng Micro F1 tổng.
+
+Trọng số mềm $\alpha=0,3$ hiện được dùng như nhau cho mọi loại thực thể và
+mọi độ dài. Giả định này đơn giản nhưng có thể không phù hợp khi cấu trúc
+của CQ, VBPL và SL khác nhau đáng kể. Giá trị $\alpha$ quá nhỏ không bổ sung
+đủ mẫu dương; giá trị quá lớn có nguy cơ làm mờ vai trò khác nhau của tiền
+tố \texttt{B} và \texttt{I}. Tương tự, việc loại nhãn \texttt{O} giúp giảm
+ưu thế số lượng của token ngoài thực thể, nhưng cũng bỏ qua các mẫu âm khó
+ngay sát biên. Vì thế, cần báo cáo tỷ lệ anchor hợp lệ theo nhãn, số cặp
+dương mạnh/mềm trong mỗi batch và phân bố cosine similarity trước và sau
+huấn luyện. Các đại lượng này cho biết loss có thay đổi hình học biểu diễn
+theo đúng cơ chế dự kiến hay không.
+
+Hướng mở rộng có thể dùng $\alpha_c$ theo loại/độ dài và tăng dần $\lambda$
+sau warm-up. Do loss phụ thuộc các cặp dương trong mini-batch, thí nghiệm
+cần cố định danh sách batch giữa các đối chứng, ghi tỷ lệ anchor bị loại theo
+lớp và so sánh lấy mẫu ngẫu nhiên, phân tầng cùng hàng đợi biểu diễn. Mọi cơ
+chế thích nghi phải được chọn trên tập phát triển dưới cùng ngân sách tìm kiếm.
+
+\subsection{Khả năng khái quát và hiệu quả tính toán}
+
+PAP\_NER chỉ đại diện cho ngôn ngữ thủ tục hành chính. Câu văn trong văn
+bản quy phạm pháp luật, bản án và hợp đồng có cấu trúc lập luận, độ dài và
+hệ thống trích dẫn khác. Vì vậy, kết quả hiện tại chưa chứng minh H-SupCon
+ổn định trước dịch chuyển miền. Đánh giá tương lai nên huấn luyện trên
+PAP\_NER rồi kiểm thử chéo trên một tập được gán nhãn từ miền pháp lý khác;
+sau đó so sánh zero-shot với fine-tune ít mẫu. Cũng cần chia kết quả theo
+nguồn, thời gian ban hành và nhóm thủ tục để phát hiện trường hợp mô hình
+ghi nhớ mẫu diễn đạt quen thuộc thay vì học đặc trưng ranh giới có thể
+chuyển giao.
+
+Nhánh chiếu được bỏ khi suy luận, nên kiến trúc không thêm phép tính vào
+đường giải mã. Tuy nhiên, điều này không đồng nghĩa chi phí tổng bằng không:
+huấn luyện vẫn phải tạo ma trận tương đồng giữa các token thực thể, với bộ
+nhớ và số phép tính tăng gần bậc hai theo số anchor trong batch. Báo cáo
+tiếp theo cần đo thời gian huấn luyện mỗi epoch, bộ nhớ GPU cực đại, thông
+lượng câu/giây, độ trễ suy luận và kích thước mô hình trong cùng môi trường.
+Nếu ma trận cặp trở thành nút thắt, có thể khảo sát lấy mẫu cặp theo lớp,
+giới hạn số anchor, hàng đợi biểu diễn qua batch hoặc khai thác hard
+negative cục bộ quanh biên thực thể.
+
+Đánh giá triển khai cần đo hiệu chuẩn, khả năng từ chối và đường cong
+coverage--risk vì lỗi VBPL/CQ có thể ảnh hưởng truy xuất, còn lỗi SL có thể
+làm đổi điều kiện áp dụng. Một bộ kiểm thử stress giữ nguyên nhãn vàng nên
+thêm có kiểm soát lỗi OCR, dấu tiếng Việt, khoảng trắng, viết tắt và chuỗi
+trích dẫn; độ giảm F1 so với đối chứng phản ánh độ bền ngoài phân bố quen thuộc.
+
+\subsection{Đánh giá ngoại sinh và cập nhật mô hình}
+
+Giá trị ứng dụng cần được kiểm tra trên tác vụ phía sau với ba biến thể dùng
+chung retriever và bộ sinh: không dùng NER, dùng thực thể dự đoán và dùng
+nhãn vàng. Recall@$k$, MRR/nDCG, độ chính xác trích dẫn và tỷ lệ câu trả lời
+được hỗ trợ bởi nguồn cho biết lỗi CQ/VBPL có thực sự ảnh hưởng truy xuất hay
+không; mọi thành phần ngoài NER phải được cố định để tránh quy kết nhầm.
+
+Khi triển khai, mỗi mô hình cần gắn với phiên bản dữ liệu, ontology nhãn,
+ngưỡng từ chối và bộ kiểm thử hồi quy. Phiên bản mới chỉ nên thay thế mô hình
+đang vận hành khi không làm giảm đáng kể F1 của lớp quan trọng và vượt qua
+bộ kiểm thử stress về OCR, dấu câu, viết tắt và chuỗi trích dẫn.
+
+\subsection{Lộ trình thực nghiệm tiếp theo}
+
+Chương trình kiểm chứng được đề xuất gồm bốn bước. \textit{Bước 1} cô lập
+từng thành phần bằng chuỗi cấu hình: CRF, CRF + SupCon trùng BIO,
+CRF + H-SupCon có giữ \texttt{O}, và mô hình đầy đủ; mọi cấu hình dùng cùng
+siêu tham số ngoài thành phần đang xét. \textit{Bước 2} quét
+$\alpha$, $\lambda$ và $\tau$ chỉ trên tập phát triển, sau đó khóa cấu hình
+trước khi chạy nhiều seed trên tập kiểm thử. \textit{Bước 3} so sánh
+Two-Stage với Joint Optimization dưới cùng ngân sách cập nhật, đồng thời
+theo dõi riêng $\mathcal{L}_{\mathrm{CRF}}$, $\mathcal{L}_{\mathrm{H-SupCon}}$
+và chuẩn gradient tại encoder để phát hiện một mục tiêu lấn át mục tiêu còn
+lại. \textit{Bước 4} thực hiện đánh giá chéo miền, phân tích theo độ dài
+thực thể và benchmark hiệu quả tính toán.
+
+Để bảo đảm khả năng tái lập, mỗi thí nghiệm cần lưu seed, mã checkpoint,
+hash cấu hình, phiên bản thư viện, quy tắc chọn epoch và toàn bộ dự đoán trên
+tập kiểm thử. Công bố dự đoán ở cấp câu cho phép thực hiện lại bootstrap,
+phân tích lỗi và so sánh cặp mà không phải huấn luyện lại mô hình. Khi các
+bước này hoàn tất, kết luận có thể chuyển từ ``tín hiệu hứa hẹn trên một
+số mô hình nền'' sang đánh giá định lượng về mức cải thiện, độ ổn định,
+chi phí và phạm vi áp dụng của H-SupCon.
+
 \section{Kết luận}\label{sec:conclusion}
 
 Bài viết đề xuất H-SupCon để mô hình hóa quan hệ phân cấp giữa nhãn BIO
 và loại thực thể, đồng thời tối ưu cùng CRF trong một mục tiêu thống nhất.
-ELECTRA V4 đạt 98,85\% Strict Micro F1 và 97,64\% F1 cho VBPL; so với
-ELECTRA V3, các mức tăng tương ứng là 0,41 và 1,00 điểm. Kết quả cho thấy
-tiềm năng của loss mới nhưng chưa cô lập được tác động của nó. Đóng góp
-chính là công thức hóa quan hệ dương mềm, kiến trúc huấn luyện hai nhánh
-không tăng đường suy luận, và một giao thức ablation đủ chặt để kiểm
-chứng giả thuyết về ranh giới dài và lớp hiếm.
+XLM-R + CRF-H-SupCon và PhoBERT V2 + CRF-H-SupCon lần lượt đạt 97,28\%
+và 97,92\% Strict Micro F1 trên 10.278 mẫu; ELECTRA + CRF-H-SupCon đạt
+98,40\%, còn BamiBERT + CRF-H-SupCon đạt 98,48\% trên 5.162 mẫu.
+Trên PhoBERT V2, cấu hình đề xuất thấp hơn CRF
+0,06 điểm F1. Kết quả một lần chạy và chênh lệch tập kiểm thử chưa cho
+phép kết luận ưu thế tổng quát của loss mới. Đóng góp chính là công thức hóa quan hệ dương mềm,
+kiến trúc Joint Optimization không tăng đường suy luận, và một giao thức
+ablation gồm cả so sánh Two-Stage--Joint để kiểm chứng giả thuyết về ranh
+giới dài và lớp hiếm.
 
 \bibliographystyle{IEEEtran}
 \renewcommand{\refname}{Tài liệu tham khảo}
-\IEEEtriggeratref{7}
 \bibliography{references}
 
 \end{document}

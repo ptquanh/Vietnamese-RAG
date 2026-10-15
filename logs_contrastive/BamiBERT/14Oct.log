@@ -1,0 +1,27 @@
+Loading checkpoint from 'outputs/bamibert_crf_hierarchical_supcon_vast_3090/best_model.pt' on device 'cuda'...
+Running evaluation on test set (5162 samples)...
+Processed 117462 tokens with 6336 phrases; Found: 6394 phrases; correct: 6268.
+Accuracy: 0.9912; (without `O` tag)
+Accuracy: 0.9970;  Precision: 0.9803; Recall: 0.9893; F1-score: 0.9848
+               CQ: Precision: 0.9855; Recall: 0.9942; F1-score: 0.9898  2070
+               NG: Precision: 0.9992; Recall: 0.9976; F1-score: 0.9984  1226
+               SL: Precision: 0.9707; Recall: 1.0000; F1-score: 0.9851  205
+             VBPL: Precision: 0.9440; Recall: 0.9663; F1-score: 0.9550  607
+               ĐT: Precision: 0.9759; Recall: 0.9854; F1-score: 0.9807  2286
+              precision    recall  f1-score   support
+
+           O     0.9993    0.9976    0.9984    105726
+        B-CQ     0.9889    0.9971    0.9930      2052
+        I-CQ     0.9481    0.9918    0.9695       608
+        B-ĐT     0.9847    0.9929    0.9888      2264
+        I-ĐT     0.9495    0.9755    0.9624      1389
+      B-VBPL     0.9615    0.9696    0.9656       593
+      I-VBPL     0.9625    0.9897    0.9759      1946
+        B-NG     1.0000    0.9984    0.9992      1228
+        I-NG     0.9992    0.9984    0.9988      1227
+        B-SL     0.9755    1.0000    0.9876       199
+        I-SL     0.9504    1.0000    0.9746       230
+
+    accuracy                         0.9970    117462
+   macro avg     0.9745    0.9919    0.9831    117462
+weighted avg     0.9970    0.9970    0.9970    117462
