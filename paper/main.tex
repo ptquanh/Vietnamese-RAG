@@ -272,8 +272,7 @@ hơn trong mỗi bước cập nhật. AMP dùng FP16 cho encoder và đầu chi
 CRF được ép về FP32 để tránh mất ổn định số. Mọi lựa chọn chỉ dựa trên tập
 phát triển; tập kiểm thử không tham gia tìm kiếm siêu tham số.
 
-\subsection{Two-Stage hay Joint Optimization?}\label{subsec:optimization}
-
+\subsection{Chiến lược tối ưu hóa: hai giai đoạn và đồng thời}\label{subsec:optimization}
 Với \textit{Two-Stage}, encoder được fine-tune bằng loss tương phản trước,
 sau đó huấn luyện cùng CRF; giai đoạn sau vì thế có thể ghi đè không gian
 biểu diễn đã học. \textit{Joint Optimization} truyền đồng thời hai gradient
