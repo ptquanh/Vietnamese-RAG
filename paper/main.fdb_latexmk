@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex main"] 1792051593.41794 "main.aux" "main.bbl" "main" 1792051632.63525 0
+["bibtex main"] 1792053220.94682 "main.aux" "main.bbl" "main" 1792053318.64549 0
   "./references.bib" 1792041235 7093 94167c28a885ed20d4f74e7962247684 ""
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/bibtex/bst/ieeetran/IEEEtran.bst" 1440622569 57748 7c8250ecf02814ce6ddc0cdbb63df1dd ""
-  "main.aux" 1792051631 8263 3b83b7cfed1461aae430517e9d0d7e59 "pdflatex"
+  "main.aux" 1792053317 8632 4de107571a1f4c0ab9529aca337e70a2 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1792051630.13689 "main.tex" "main.pdf" "main" 1792051632.63629 0
+["pdflatex"] 1792053315.97337 "main.tex" "main.pdf" "main" 1792053318.6464 0
   "C:/Users/Quoc Anh/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1792040328 130481 c092d2d34bc0a1e8173e2df9d325afdd ""
   "C:/Users/Quoc Anh/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1776847000 13351760 a6a012a8487cab0182112c494badb174 ""
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/vntex/t5.enc" 1368738347 7824 21ade6c3c7fd67cb4ace8dbc91c53118 ""
@@ -42,6 +42,7 @@
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/tfm/vntex/urwvn/utmrc8v.tfm" 1124904812 13268 4823fc83b0d556e638bb7164ef28561a ""
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/tfm/vntex/urwvn/utmri8v.tfm" 1124904812 9008 675f1fda1424847c1472fe17c01a2c25 ""
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb" 1247596666 34811 78b52f49e893bcba91bd7581cdc144c0 ""
+  "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx7.pfb" 1247596667 32007 e8fa0078355f39467039935974716569 ""
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb" 1247596666 32166 b0c356b15f19587482a9217ce1d8fa67 ""
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb" 1247596667 30251 6afa5cb1d0204815a708a080681d4674 ""
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb" 1247596667 36299 5f9df58c2139e7edcf37c8fca4bd384d ""
@@ -206,11 +207,11 @@
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/tex/latex/vntex/vncaps.tex" 1368738347 3273 a55ebdb07413d2fea580f210e3c0b252 ""
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
   "C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/tex/latex/xurl/xurl.sty" 1641733940 4675 e4b8c405820368c2dfb03526e16d725a ""
-  "figures/model_f1_comparison.pdf" 1792051516 32959 cef696fa3f52a0c7bccd169f2a843dd4 ""
-  "main.aux" 1792051631 8263 3b83b7cfed1461aae430517e9d0d7e59 "pdflatex"
-  "main.bbl" 1792051593 7397 cfe26e1599daf19d143035fa807a5bb2 "bibtex main"
-  "main.out" 1792051631 4420 62161c6b943974716e63717a592ea826 "pdflatex"
-  "main.tex" 1792051617 40086 2a11329050d62e181f0e7256e6b611cd ""
+  "figures/model_f1_comparison.pdf" 1792052860 33217 3b442ba2e3590b730b223ce00504d57e ""
+  "main.aux" 1792053317 8632 4de107571a1f4c0ab9529aca337e70a2 "pdflatex"
+  "main.bbl" 1792053221 7397 cfe26e1599daf19d143035fa807a5bb2 "bibtex main"
+  "main.out" 1792053317 4475 e4191417f3789542dc83b15a791cf38a "pdflatex"
+  "main.tex" 1792053287 40237 3a8f7016062c43de7491132399fa7eea ""
   (generated)
   "main.aux"
   "main.log"

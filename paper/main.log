@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.22)  15 OCT 2026 15:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.22)  15 OCT 2026 15:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1200,22 +1200,34 @@ Package microtype Warning: I cannot find a protrusion list for font
 
 Package microtype Warning: I cannot find a protrusion list for font
 (microtype)                `T5/ptm/m/n/5'. Switching off
-(microtype)                protrusion for this font on input line 299.
+(microtype)                protrusion for this font on input line 317.
 
 [2]
 
 Package microtype Warning: I cannot find a protrusion list for font
 (microtype)                `T5/ptm/m/n/6'. Switching off
-(microtype)                protrusion for this font on input line 357.
+(microtype)                protrusion for this font on input line 385.
 
 [3]
-<figures/model_f1_comparison.pdf, id=183, 254.5181pt x 133.5182pt>
+<figures/model_f1_comparison.pdf, id=187, 253.96495pt x 137.95973pt>
 File: figures/model_f1_comparison.pdf Graphic file (type pdf)
 <use figures/model_f1_comparison.pdf>
-Package pdftex.def Info: figures/model_f1_comparison.pdf  used on input line 45
-2.
-(pdftex.def)             Requested size: 252.0pt x 132.19768pt.
- [4 <./figures/model_f1_comparison.pdf>] [5] (main.bbl
+Package pdftex.def Info: figures/model_f1_comparison.pdf  used on input line 48
+3.
+(pdftex.def)             Requested size: 252.0pt x 136.8963pt.
+
+
+Package microtype Warning: I cannot find a protrusion list for font
+(microtype)                `T5/ptm/m/n/6.6'. Switching off
+(microtype)                protrusion for this font on input line 507.
+
+LaTeX Font Info:    Calculating math sizes for size <6.6> on input line 511.
+
+Package microtype Warning: I cannot find a protrusion list for font
+(microtype)                `T5/ptm/b/n/6.6'. Switching off
+(microtype)                protrusion for this font on input line 513.
+
+[4 <./figures/model_f1_comparison.pdf>] [5] (main.bbl
 
 Package microtype Warning: I cannot find a protrusion list for font
 (microtype)                `T5/ptm/m/it/8'. Switching off
@@ -1239,47 +1251,48 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2026-03-20>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 62161C6B943974716E63717A592EA826;4420.
+(rerunfilecheck)             Checksum: E4191417F3789542DC83B15A791CF38A;4475.
  ) 
 Here is how much of TeX's memory you used:
- 25541 strings out of 467691
- 473467 string characters out of 5413499
- 930066 words of memory out of 5000000
- 53919 multiletter control sequences out of 15000+600000
- 776988 words of font info for 256 fonts, out of 8000000 for 9000
+ 25610 strings out of 467691
+ 474689 string characters out of 5413499
+ 932086 words of memory out of 5000000
+ 53971 multiletter control sequences out of 15000+600000
+ 784461 words of font info for 274 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  102i,19n,107p,1003b,904s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/
 cm/cmbx10.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/publ
-ic/amsfonts/cm/cmbx8.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts
-/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/
-MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Quoc Anh/AppData/Loc
-al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Users/Quoc Anh/
-AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/User
-s/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.p
+ic/amsfonts/cm/cmbx7.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts
+/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/M
+iKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Quoc Anh/AppData/Loca
+l/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Quoc Anh/
+AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/User
+s/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.p
 fb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts
-/cm/cmmi8.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/publ
-ic/amsfonts/cm/cmr10.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts
-/type1/public/amsfonts/cm/cmr5.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/Mi
-KTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Quoc Anh/AppData/Local/P
-rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Quoc Anh/AppDa
-ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/Quoc
- Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C
-:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
-msy5.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
-sfonts/cm/cmsy7.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type
-1/public/amsfonts/cm/cmsy8.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX
-/fonts/type1/public/amsfonts/symbols/msbm10.pfb><C:/Users/Quoc Anh/AppData/Loca
-l/Programs/MiKTeX/fonts/type1/vntex/urwvn/ucrb8v.pfb><C:/Users/Quoc Anh/AppData
-/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/ucrr8v.pfb><C:/Users/Quoc Anh/Ap
-pData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/utmb8v.pfb><C:/Users/Quoc A
-nh/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/utmbi8v.pfb><C:/Users/
-Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/utmr8v.pfb><C:/U
-sers/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/utmri8v.pfb
->
-Output written on main.pdf (6 pages, 412822 bytes).
+/cm/cmmi7.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmmi8.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts
+/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/M
+iKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Users/Quoc Anh/AppData/Local/
+Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Quoc Anh/AppD
+ata/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Quo
+c Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:
+/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
+sy10.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
+sfonts/cm/cmsy5.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type
+1/public/amsfonts/cm/cmsy7.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX
+/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/Quoc Anh/AppData/Local/Prog
+rams/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb><C:/Users/Quoc Anh/A
+ppData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/ucrb8v.pfb><C:/Users/Quoc 
+Anh/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/ucrr8v.pfb><C:/Users/
+Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/utmb8v.pfb><C:/U
+sers/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/utmbi8v.pfb
+><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/utmr8
+v.pfb><C:/Users/Quoc Anh/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/urwvn/
+utmri8v.pfb>
+Output written on main.pdf (6 pages, 430541 bytes).
 PDF statistics:
- 350 PDF objects out of 1000 (max. 8388607)
- 56 named destinations out of 1000 (max. 500000)
- 42178 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 359 PDF objects out of 1000 (max. 8388607)
+ 59 named destinations out of 1000 (max. 500000)
+ 46274 words of extra memory for PDF output out of 51595 (max. 10000000)
 

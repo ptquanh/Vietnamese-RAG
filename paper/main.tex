@@ -274,32 +274,48 @@ phát triển; tập kiểm thử không tham gia tìm kiếm siêu tham số.
 
 \subsection{Two-Stage hay Joint Optimization?}\label{subsec:optimization}
 
-Một lựa chọn phương pháp luận quan trọng là thời điểm đưa tín hiệu tương
-phản vào encoder. Với \textit{Two-Stage}, encoder trước hết được fine-tune
-bằng loss tương phản; sau đó encoder và CRF được huấn luyện cho gán nhãn
-chuỗi. Cách tách này dễ phân tích từng giai đoạn, nhưng bước thứ hai có thể
-làm thay đổi không gian biểu diễn đã học ở bước thứ nhất. Với \textit{Joint
-Optimization}, loss CRF và loss tương phản cùng lan truyền gradient qua
-encoder trong mỗi mini-batch. CUA-MNER là một ví dụ gần đây của thiết kế
-end-to-end kết hợp CRF và tương phản token-level~\cite{yang2026cuamner}.
+Với \textit{Two-Stage}, encoder được fine-tune bằng loss tương phản trước,
+sau đó huấn luyện cùng CRF; giai đoạn sau vì thế có thể ghi đè không gian
+biểu diễn đã học. \textit{Joint Optimization} truyền đồng thời hai gradient
+qua encoder trong mỗi mini-batch; CUA-MNER là một thiết kế token-level gần
+đây theo hướng này~\cite{yang2026cuamner}. Bài báo chọn Joint theo
+Phương trình~\eqref{eq:joint-loss} như một giả thuyết thiết kế. So sánh công
+bằng với Two-Stage vẫn phải giữ nguyên encoder, seed và số lần cập nhật.
 
-Nghiên cứu này chọn Joint Optimization theo Phương trình~\eqref{eq:joint-loss}
-để duy trì đồng thời tín hiệu cấu trúc chuỗi và hình học biểu diễn. Đây là
-một giả thuyết thiết kế, không phải kết luận rằng Joint luôn vượt Two-Stage;
-phép so sánh trực tiếp hai chiến lược trên cùng encoder, seed và ngân sách
-huấn luyện vẫn được xem là ablation bắt buộc.
+\subsection{Hàm mất mát đề xuất CRF--H-SupCon}\label{subsec:loss}
 
-\subsection{Hàm mất mát CRF--H-SupCon}\label{subsec:loss}
+Cùng biểu diễn token $\mathbf h_i\in\mathbb R^d$ được đưa vào hai nhánh
+huấn luyện có vai trò khác nhau.
 
-Với biểu diễn theo từ $\mathbf h_i\in\mathbb R^d$, đầu chiếu hai tầng
-tạo $\mathbf z_i=g(\mathbf h_i)/\|g(\mathbf h_i)\|_2$. Đầu phân loại
-tạo điểm phát xạ cho CRF; CRF tối thiểu hóa log-hợp lý âm
-$\mathcal L_{\mathrm{CRF}}$ và dùng Viterbi khi suy luận
-~\cite{lafferty2001crf}. Nhánh tương phản chỉ xét tập token thực thể
-$\mathcal I_e=\{i\mid y_i\ne\texttt{O}\}$.
+\noindent\textbf{Mất mát CRF.} Với câu $\mathbf x$ dài $n$, gọi
+$\mathbf e_i[y_i]$ là điểm phát xạ của nhãn $y_i$ và $A_{u,v}$ là điểm
+chuyển từ nhãn $u$ sang $v$. Điểm và xác suất của toàn chuỗi BIO là
+\begin{equation}
+\begin{aligned}
+S(\mathbf x,\mathbf y)
+ &=\sum_{i=1}^{n}\bigl(\mathbf e_i[y_i]+A_{y_{i-1},y_i}\bigr),\\
+p_{\mathrm{CRF}}(\mathbf y\mid\mathbf x)
+ &=\frac{\exp S(\mathbf x,\mathbf y)}
+ {\sum_{\mathbf y'\in\mathcal Y(\mathbf x)}\exp S(\mathbf x,\mathbf y')}.
+\end{aligned}
+\label{eq:crf-probability}
+\end{equation}
+Với mini-batch $\mathcal B$, CRF tối thiểu hóa log-hợp lý âm
+\begin{equation}
+\mathcal L_{\mathrm{CRF}}
+=-\frac{1}{|\mathcal B|}\sum_{(\mathbf x,\mathbf y)\in\mathcal B}
+\log p_{\mathrm{CRF}}(\mathbf y\mid\mathbf x),
+\label{eq:crf-loss}
+\end{equation}
+qua đó học đồng thời điểm phát xạ và ràng buộc chuyển tiếp toàn chuỗi;
+Viterbi được dùng để tìm chuỗi có điểm lớn nhất khi suy luận
+~\cite{lafferty2001crf}.
 
-Gọi $t(y)$ là loại thực thể sau khi bỏ tiền tố BIO. Với $i\ne j$, trọng
-số dương phân cấp được định nghĩa:
+\noindent\textbf{Mất mát tương phản phân cấp.} Đầu chiếu hai tầng tạo
+$\mathbf z_i=g(\mathbf h_i)/\|g(\mathbf h_i)\|_2$. Khác SupCon chuẩn
+~\cite{khosla2020supcon}, nhánh đề xuất chỉ xét token thực thể
+$\mathcal I_e=\{i\mid y_i\ne\texttt{O}\}$ và phân biệt hai mức quan hệ
+dương. Gọi $t(y)$ là loại thực thể sau khi bỏ tiền tố BIO. Với $i\ne j$:
 \begin{equation}
 w_{ij}=\begin{cases}
 1, & y_i=y_j,\\
@@ -319,17 +335,29 @@ $s_{ik}=\mathbf z_i^\top\mathbf z_k/\tau$, loss cho anchor hợp lệ là:
 \log\frac{e^{s_{ij}}}{\sum_{k\in\mathcal A(i)}e^{s_{ik}}}.
 \label{eq:hsupcon-anchor}
 \end{equation}
-Chỉ các anchor có $\sum_jw_{ij}>0$ được lấy trung bình để tránh chia
-cho 0. Mục tiêu cuối cùng là
+Đặt $\mathcal V=\{i\in\mathcal I_e\mid
+\sum_{j\in\mathcal A(i)}w_{ij}>0\}$, mất mát của nhánh tương phản là
 \begin{equation}
-\mathcal L=\mathcal L_{\mathrm{CRF}}+
+\mathcal L_{\mathrm{H\text{-}SupCon}}
+=\frac{1}{|\mathcal V|}\sum_{i\in\mathcal V}\ell_i.
+\label{eq:hsupcon-loss}
+\end{equation}
+Việc chỉ lấy trung bình trên $\mathcal V$ tránh phép chia cho 0 khi batch
+không chứa cặp dương cho một anchor.
+
+\noindent\textbf{Mục tiêu tối ưu chung.} Hai định nghĩa trên được kết hợp:
+\begin{equation}
+\mathcal L_{\mathrm{joint}}=\mathcal L_{\mathrm{CRF}}+
 \lambda\mathcal L_{\mathrm{H\text{-}SupCon}},
 \quad \lambda=0{,}3,\ \alpha=0{,}3,\ \tau=0{,}07.
 \label{eq:joint-loss}
 \end{equation}
-Loại \texttt{O} vẫn tham gia đầy đủ vào CRF nhưng không chi phối mẫu
-âm của H-SupCon. Khi kiểm thử, đầu chiếu và loss tương phản được bỏ;
-đường suy luận chỉ còn encoder, tầng phát xạ và Viterbi.
+Gradient từ hai số hạng được cộng tại encoder dùng chung: CRF bảo toàn
+tính hợp lệ của chuỗi, còn H-SupCon kéo gần token trùng BIO với trọng số
+$1$ và token cùng loại khác tiền tố với trọng số $\alpha$. Nhãn \texttt{O}
+vẫn tham gia đầy đủ vào CRF nhưng không chi phối nhánh tương phản. Khi
+kiểm thử, đầu chiếu bị loại; đường suy luận chỉ còn encoder, tầng phát xạ
+và Viterbi, nên loss mới không làm tăng chi phí suy luận.
 
 \begin{figure*}[t]
 \centering
@@ -401,20 +429,18 @@ phối diễn giải. Điểm được tính theo chuẩn BIO bằng
 \texttt{seqeval} với \texttt{mode='strict'} và
 \texttt{scheme=IOB2}~\cite{nakayama2018seqeval}.
 
-Để tách lỗi ranh giới khỏi lỗi phân loại, bốn chế độ đối sánh được dùng:
-\begin{itemize}
-    \item \textbf{Strict:} đúng cả ranh giới và loại thực thể;
-    \item \textbf{Exact:} đúng ranh giới, không xét loại thực thể;
-    \item \textbf{Partial:} ranh giới có giao nhau, không xét loại;
-    \item \textbf{Type:} ranh giới có giao nhau và đúng loại.
-\end{itemize}
-Exact giúp nhận diện lỗi phân loại khi ranh giới đã đúng; Partial và
-Type cho biết mô hình có định vị đúng vùng thực thể hay không. Điểm kiểm
-soát được chọn theo F1 thực thể trên tập phát triển; các bảng kết quả
-được tính trên tập kiểm thử tương ứng.
+Phân tích lỗi dùng thêm bốn chế độ: \textbf{Strict} yêu cầu đúng ranh giới
+và loại; \textbf{Exact} chỉ yêu cầu đúng ranh giới; \textbf{Partial} yêu cầu
+hai vùng giao nhau; \textbf{Type} yêu cầu vùng giao nhau và đúng loại.
+Điểm kiểm soát được chọn theo F1 thực thể trên tập phát triển.
 \section{Kết quả}\label{sec:results}
 
 \subsection{So sánh tổng quan}\label{subsec:overall}
+
+Kết quả so sánh cho thấy sự khác biệt về hiệu suất giữa các kiến trúc
+Transformer được đánh giá, đồng thời làm rõ tác động quan sát được của việc
+tích hợp học tương phản có giám sát phân cấp (\textit{Hierarchical Supervised
+Contrastive Learning}, H-SupCon) vào kiến trúc gán nhãn chuỗi dựa trên CRF.
 
 \begin{table}[t]
 \centering
@@ -435,9 +461,14 @@ BamiBERT + CRF-H-SupCon & 98,03 & 98,93 & 98,48 \\
 \end{tabular*}
 \end{table}
 
-\noindent\textbf{Nhận xét 1.} Trên cùng 10.278 mẫu, PhoBERT V2 +
-CRF-H-SupCon cao hơn XLM-R + CRF-H-SupCon 0,76 điểm precision, 0,54 điểm
-recall và 0,64 điểm F1.
+\noindent\textbf{Hiệu suất giữa các mô hình Transformer nền tảng
+(Performance Across Transformer Backbones).} Khi được đánh giá trên cùng tập
+kiểm thử gồm 10.278 mẫu, PhoBERT V2 + CRF-H-SupCon đạt cao hơn XLM-R +
+CRF-H-SupCon lần lượt 0,76; 0,54 và 0,64 điểm phần trăm về Precision, Recall
+và F1-score. Sự cải thiện nhất quán này gợi ý lợi thế tiềm năng của mô hình
+tiền huấn luyện chuyên biệt cho tiếng Việt so với biểu diễn đa ngôn ngữ trong
+NER văn bản hành chính. Nói cách khác, biểu diễn ngữ cảnh đơn ngữ có thể nắm
+bắt tốt hơn các đặc trưng ngôn ngữ và cách diễn đạt chuyên biệt của miền này.
 
 \noindent\textbf{Nhận xét 2.} Với cùng backbone PhoBERT V2, CRF-H-SupCon
 đạt 98,65/97,21/97,92, thấp hơn CRF lần lượt 0,10/0,01/0,06 điểm P/R/F1;
@@ -450,8 +481,8 @@ về trị số, nhưng được đánh giá trên 5.162 mẫu nên không xếp
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/model_f1_comparison.pdf}
-\caption{Strict Micro F1 theo mô hình nền. Điểm CRF chỉ có ở PhoBERT V2;
-BamiBERT (*) dùng tập kiểm thử 5.162 mẫu nên chỉ mang ý nghĩa mô tả.}
+\caption{So sánh Strict Micro F1 của năm cấu hình mô hình. BamiBERT (*)
+được đánh giá trên 5.162 mẫu nên chỉ dùng để tham khảo định tính.}
 \label{fig:model-f1}
 \end{figure}
 
@@ -473,12 +504,11 @@ trình~\eqref{eq:weights}--\eqref{eq:joint-loss}.
 
 \begin{table}[t]
 \centering
-\scriptsize
+\fontsize{6.6}{7.4}\selectfont
 \caption{F1 theo loại thực thể (\%).}
 \label{tab:entity-f1}
-\setlength{\tabcolsep}{1pt}
-\begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}p{2.9cm}
-*{5}{>{\centering\arraybackslash}X}@{}}
+\setlength{\tabcolsep}{0pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccccc@{}}
 \toprule
 \thead[l]{Mô hình} & \thead{CQ} & \thead{ĐT} & \thead{VBPL} & \thead{NG} & \thead{SL} \\
 \midrule
@@ -488,7 +518,7 @@ PhoBERT V2 + CRF-H-SupCon & 97,69 & 97,21 & 97,31 & 99,95 & 97,39 \\
 ELECTRA + CRF-H-SupCon & 97,80 & 97,80 & 96,80 & 99,70 & 97,40 \\
 BamiBERT + CRF-H-SupCon & 98,98 & 98,07 & 95,50 & 99,84 & 98,51 \\
 \bottomrule
-\end{tabularx}
+\end{tabular*}
 \end{table}
 
 Với PhoBERT V2, CRF-H-SupCon chỉ cao hơn CRF ở SL ($+0{,}15$ điểm), nhưng
@@ -513,47 +543,29 @@ ngân sách tính toán để tách lợi ích của loss khỏi lịch huấn l
 
 \section{Thảo luận}\label{sec:discussion}
 
-Trên PhoBERT V2, cấu hình CRF-H-SupCon thấp hơn CRF 0,06 điểm F1; đây là
-bằng chứng ghép cặp trực tiếp nhưng mới chỉ có một lần chạy. Kết quả giữa
-XLM-R, PhoBERT V2 và ELECTRA cho thấy ảnh hưởng của backbone, còn BamiBERT chỉ có ý
-nghĩa mô tả do dùng tập kiểm thử khác kích thước. CRF và H-SupCon vẫn có
-vai trò bổ sung về mặt thiết kế: CRF ràng buộc chuyển tiếp nhãn, còn
-H-SupCon thay đổi hình học biểu diễn. Đầu chiếu bị loại khi suy luận nên
-loss mới không thêm phép tính vào đường giải mã; chi phí huấn luyện vẫn
-cần đo thống nhất.
+Trên PhoBERT V2, CRF-H-SupCon thấp hơn CRF 0,06 điểm F1 trong một lần chạy.
+Khác biệt giữa XLM-R, PhoBERT V2 và ELECTRA còn phản ánh ảnh hưởng backbone;
+BamiBERT chỉ có ý nghĩa mô tả do dùng tập kiểm thử khác kích thước. Về cơ
+chế, CRF ràng buộc chuyển tiếp nhãn, còn H-SupCon định hình biểu diễn token;
+đầu chiếu bị loại khi suy luận nên chỉ làm tăng chi phí huấn luyện.
 
-Thiếu ablation $\alpha=0$, giữ/bỏ nhãn
-\texttt{O} và nhiều seed khiến chưa thể tách tác động của từng thành phần
-trong H-SupCon. Đây là khoảng trống thực nghiệm quan trọng nhất còn lại.
-
-Cuối cùng, PAP\_NER bắt nguồn từ thủ tục hành chính. Kết quả về VBPL
-trong bài đo chất lượng nhận diện \textbf{trích dẫn văn bản pháp luật
-bên trong thủ tục hành chính}, không chứng minh hiệu quả trên toàn bộ
-văn bản quy phạm pháp luật, bản án hay hợp đồng. Phạm vi này được giữ
-nhất quán trong tên bài, tóm tắt và kết luận.
+Việc thiếu ablation $\alpha=0$, giữ/bỏ \texttt{O} và nhiều seed chưa cho
+phép tách tác động của loss mới. PAP\_NER cũng chỉ đo nhận diện trích dẫn
+pháp luật trong thủ tục hành chính, không đại diện cho mọi văn bản pháp lý.
 
 \section{Hạn chế và hướng phát triển}\label{sec:limitations}
 
 \subsection{Giá trị nội tại và độ tin cậy thống kê}
 
-Hạn chế quan trọng nhất là mỗi cấu hình hiện mới có một lần chạy được
-báo cáo. Quá trình fine-tune Transformer nhạy với khởi tạo tầng phân loại,
-thứ tự mini-batch và dropout; do đó, chênh lệch 0,64 điểm giữa XLM-R và
-PhoBERT V2 có thể nằm trong dao động giữa các seed. Điểm đơn lẻ chỉ mô tả lần chạy hiện tại,
-chưa cho phép kết luận rằng thứ hạng sẽ được bảo toàn khi huấn luyện lại.
-Thực nghiệm tiếp theo cần dùng tối thiểu năm seed cố định cho từng cấu hình,
-báo cáo trung bình, độ lệch chuẩn và khoảng tin cậy 95\%. Ngoài ra, kiểm
-định bootstrap theo cặp nên lấy mẫu ở cấp câu hoặc cấp tài liệu trên cùng
-tập kiểm thử, thay vì xem từng thực thể là một quan sát độc lập.
+Mỗi cấu hình hiện chỉ có một lần chạy, nên chênh lệch nhỏ có thể nằm trong
+dao động do seed, mini-batch và dropout. Cần chạy tối thiểu năm seed, báo cáo
+trung bình, độ lệch chuẩn, khoảng tin cậy 95\% và bootstrap ghép cặp ở cấp
+câu hoặc tài liệu.
 
-Hiện chỉ PhoBERT V2 có đối chứng CRF trên cùng backbone; XLM-R, ELECTRA và BamiBERT
-chưa có cặp tương ứng. Một ablation có giá trị nhân quả phải giữ nguyên
-checkpoint, seed, bộ chia batch, số bước
-cập nhật, lịch learning rate và quy tắc chọn mô hình. Hai lần chạy chỉ được
-khác đúng một yếu tố: bật hoặc tắt nhánh tương phản. Cùng nguyên tắc đó,
-so sánh Two-Stage--Joint phải dùng cùng số lần encoder được cập nhật hoặc
-cùng ngân sách FLOPs; nếu không, lợi thế có thể đến từ thời gian huấn luyện
-dài hơn chứ không phải cách phối hợp hai mục tiêu.
+Chỉ PhoBERT V2 có đối chứng CRF cùng backbone; XLM-R, ELECTRA và BamiBERT
+chưa có cặp tương ứng. Ablation nhân quả phải giữ nguyên checkpoint, seed,
+batch, số bước, lịch học và quy tắc chọn mô hình; so sánh Two-Stage--Joint
+cũng phải dùng cùng số lần cập nhật hoặc ngân sách FLOPs.
 
 \subsection{Giới hạn của phép đo và phân tích cơ chế}
 
@@ -661,6 +673,7 @@ kiến trúc Joint Optimization không tăng đường suy luận, và một gia
 ablation gồm cả so sánh Two-Stage--Joint để kiểm chứng giả thuyết về ranh
 giới dài và lớp hiếm.
 
+\IEEEtriggeratref{4}
 \bibliographystyle{IEEEtran}
 \renewcommand{\refname}{Tài liệu tham khảo}
 \bibliography{references}
