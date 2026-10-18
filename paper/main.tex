@@ -1,5 +1,7 @@
 % REV-ECIT 2026: IEEE conference format, A4 paper, maximum six pages.
-% Compile with: latexmk -pdf main.tex
+% Compile with: pdflatex main.tex (twice to resolve citations and cross-references).
+% All article content, figures and references are contained in this file.
+% Standard LaTeX packages and the IEEEtran document class are still required.
 \documentclass[conference,a4paper]{IEEEtran}
 
 \usepackage{iftex}
@@ -36,14 +38,47 @@
 \renewcommand{\IEEEkeywordsname}{Từ khóa}
 \renewcommand{\refname}{Tài liệu tham khảo}
 
-\title{Học tương phản có giám sát phân cấp ở mức token kết hợp CRF cho nhận dạng thực thể trong văn bản thủ tục hành chính tiếng Việt}
-\author{
-\IEEEauthorblockN{Nguyễn Thị Bích Nguyên, Lê Trung Kiên, Huỳnh Tiến Đạt \\
-Đặng Thành Tài, Nguyễn Trường Giang và Nguyễn Thành Hưng}
-\IEEEauthorblockA{Khoa Công nghệ Thông tin 2, Học viện Công nghệ Bưu chính Viễn thông, Việt Nam\\
-Email tác giả liên hệ: \href{mailto:ntbichnguyen@ptithcm.edu.vn}{ntbichnguyen@ptithcm.edu.vn}}
+% Compact layout only: preserve all text and font sizes.
+\linespread{0.97}
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+
+% Fail compilation if the final output is not exactly six pages.
+\newcount\paperpagecount
+\AddToHook{shipout/after}{\global\advance\paperpagecount by 1}
+\AddToHook{enddocument/afterlastpage}{%
+  \ifnum\paperpagecount=6\relax
+    \typeout{PAPER PAGE CHECK: exactly 6 pages.}%
+  \else
+    \PackageError{paper-layout}{Expected 6 pages, got \the\paperpagecount}
+      {Adjust layout spacing without changing article content.}%
+  \fi
 }
 
+
+\title{Học tương phản có giám sát phân cấp ở mức token kết hợp CRF cho nhận dạng thực thể trong văn bản thủ tục hành chính tiếng Việt}
+
+\author{
+\IEEEauthorblockN{
+Nguyễn Thị Bích Nguyên, Nguyễn Thị Tuyết Hải, Lê Trung Kiên, Huỳnh Tiến Đạt\\
+Đặng Thành Tài, Nguyễn Trường Giang và Nguyễn Thành Hưng
+}
+\IEEEauthorblockA{Khoa Công nghệ Thông tin II,
+\\
+Học Viện Công Nghệ Bưu Chính Viễn Thông\\
+\textnormal{Email:}
+\href{mailto:nguyenntb@ptit.edu.vn}{nguyenntb@ptit.edu.vn},\quad
+\href{mailto:ntthai@ptit.edu.vn}{ntthai@ptit.edu.vn},
+\href{mailto:n23dcat037@student.ptithcm.edu.vn}{n23dcat037@student.ptithcm.edu.vn},\quad
+\href{mailto:n23dcdk011@student.ptithcm.edu.vn}{n23dcdk011@student.ptithcm.edu.vn},\\
+\href{mailto:n23dccn120@student.ptithcm.edu.vn}{n23dccn120@student.ptithcm.edu.vn},\quad
+\href{mailto:n23dccn085@student.ptithcm.edu.vn}{n23dccn085@student.ptithcm.edu.vn},
+\href{mailto:n23dcdk028@student.ptithcm.edu.vn}{n23dcdk028@student.ptithcm.edu.vn}
+}
+}
 \begin{document}
 \pagestyle{fancy}
 \fancyhf{}
@@ -517,8 +552,7 @@ BamiBERT + CRF-H-SupCon & 98,03 & 98,93 & 98,48 \\
 \end{tabular*}
 \end{table}
 
-\noindent\textbf{Hiệu suất giữa các mô hình Transformer nền tảng
-(Performance Across Transformer Backbones).} Khi được đánh giá trên cùng tập
+\noindent\textbf{Hiệu suất giữa các mô hình Transformer nền tảng.} Khi được đánh giá trên cùng tập
 kiểm thử gồm 10.278 mẫu, PhoBERT V2 + CRF-H-SupCon đạt cao hơn XLM-R +
 CRF-H-SupCon lần lượt 0,76; 0,54 và 0,64 điểm phần trăm về Precision, Recall
 và F1-score. Sự cải thiện nhất quán này gợi ý lợi thế tiềm năng của mô hình
@@ -545,7 +579,35 @@ chỉ mang tính mô tả và không được dùng để xếp hạng trực ti
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{figures/model_f1_comparison.pdf}
+% Self-contained chart; values match figures/plot_model_f1.py.
+\begingroup
+\pgfmathsetlengthmacro{\chartxunit}{\columnwidth/6.2}
+\begin{tikzpicture}[x=\chartxunit,y=2cm,font=\scriptsize]
+  % The vertical origin corresponds to F1 = 97.0 percent.
+  \foreach \y/\tick in {0/97{,}0,0.2/97{,}2,0.4/97{,}4,0.6/97{,}6,
+                         0.8/97{,}8,1.0/98{,}0,1.2/98{,}2,1.4/98{,}4,
+                         1.6/98{,}6,1.8/98{,}8} {
+    \draw[gray!50,densely dotted,line width=0.3pt] (-0.55,\y) -- (4.55,\y);
+    \draw[line width=0.4pt] (-0.61,\y) -- (-0.55,\y);
+    \node[anchor=east,font=\tiny] at (-0.64,\y) {\tick};
+  }
+  \foreach \x/\height/\score in {0/0.98/97{,}98,1/0.92/97{,}92,
+                                2/0.28/97{,}28,3/1.40/98{,}40,
+                                4/1.48/98{,}48} {
+    \fill[draw=none,fill={rgb,255:red,36;green,91;blue,133}]
+      (\x-0.29,0) rectangle (\x+0.29,\height);
+    \node[anchor=south,inner sep=2pt] at (\x,\height) {\score};
+    \draw[line width=0.4pt] (\x,0) -- (\x,-0.03);
+  }
+  \draw[line width=0.4pt] (-0.55,1.8) -- (-0.55,0) -- (4.55,0);
+  \node[rotate=90,anchor=south] at (-1.23,0.9) {Strict Micro F1 (\%)};
+  \node[anchor=north,align=center,font=\tiny] at (0,-0.05) {PhoBERT V2\\CRF};
+  \node[anchor=north,align=center,font=\tiny] at (1,-0.05) {PhoBERT V2\\CRF-HSC};
+  \node[anchor=north,align=center,font=\tiny] at (2,-0.05) {XLM-R\\CRF-HSC};
+  \node[anchor=north,align=center,font=\tiny] at (3,-0.05) {ELECTRA\\CRF-HSC};
+  \node[anchor=north,align=center,font=\tiny] at (4,-0.05) {BamiBERT*\\CRF-HSC};
+\end{tikzpicture}
+\endgroup
 \caption{So sánh Strict Micro F1 của năm cấu hình mô hình. BamiBERT (*)
 được đánh giá trên 5.162 mẫu nên chỉ dùng để tham khảo định tính.
 Trục tung bắt đầu từ 97\%; PhoBERT V2 CRF và ELECTRA chưa đối chiếu log nguồn.}
@@ -704,8 +766,164 @@ nghĩa mô tả. Hiệu suất thay đổi theo nhóm thực thể và backbone,
 thiết kế cụ thể cho học biểu diễn phân cấp trong NER hành chính và
 cơ sở để tiếp tục kiểm chứng bằng các thí nghiệm có kiểm soát.
 
-\bibliographystyle{IEEEtran}
+% References are embedded here; no external .bib or .bbl file is needed.
 \renewcommand{\refname}{Tài liệu tham khảo}
-\bibliography{references}
+% Generated by IEEEtran.bst, version: 1.14 (2015/08/26)
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{#1}
+\csname url@samestyle\endcsname
+\providecommand{\newblock}{\relax}
+\providecommand{\bibinfo}[2]{#2}
+\providecommand{\BIBentrySTDinterwordspacing}{\spaceskip=0pt\relax}
+\providecommand{\BIBentryALTinterwordstretchfactor}{4}
+\providecommand{\BIBentryALTinterwordspacing}{\spaceskip=\fontdimen2\font plus
+\BIBentryALTinterwordstretchfactor\fontdimen3\font minus
+  \fontdimen4\font\relax}
+\providecommand{\BIBforeignlanguage}[2]{{%
+\expandafter\ifx\csname l@#1\endcsname\relax
+\typeout{** WARNING: IEEEtran.bst: No hyphenation pattern has been}%
+\typeout{** loaded for the language `#1'. Using the pattern for}%
+\typeout{** the default language instead.}%
+\else
+\language=\csname l@#1\endcsname
+\fi
+#2}}
+\providecommand{\BIBdecl}{\relax}
+\BIBdecl
+
+\bibitem{la2026papner}
+\BIBentryALTinterwordspacing
+D.-D. La, T.-B. Tran, N.-H. Du, N.-H. Dang, T.-N. Phung, and V.-K. Tran,
+  ``{PAP\_NER}: A large-scale vietnamese administrative named entity
+  recognition corpus and hybrid deep learning architecture,'' \emph{PLOS ONE},
+  vol.~21, no.~7, p. e0353166, 2026. [Online]. Available:
+  \url{https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0353166}
+\BIBentrySTDinterwordspacing
+
+\bibitem{truong2021phonercovid19}
+\BIBentryALTinterwordspacing
+T.~H. Truong, M.~H. Dao, and D.~Q. Nguyen, ``{COVID-19} named entity
+  recognition for vietnamese,'' in \emph{Proceedings of the 2021 Conference of
+  the North American Chapter of the Association for Computational Linguistics:
+  Human Language Technologies}.\hskip 1em plus 0.5em minus 0.4em\relax
+  Association for Computational Linguistics, 2021, pp. 2146--2153. [Online].
+  Available: \url{https://aclanthology.org/2021.naacl-main.173/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{nguyen2023legalreferences}
+\BIBentryALTinterwordspacing
+T.~T.~T. Nguyen, N.~D. Nguyen, X.~B. Ngo, and M.~P. Tu, ``Joint reference and
+  relation extraction from legal documents with enhanced decoder input,''
+  \emph{Cybernetics and Information Technologies}, vol.~23, no.~2, pp. 72--86,
+  2023. [Online]. Available: \url{https://doi.org/10.2478/cait-2023-0014}
+\BIBentrySTDinterwordspacing
+
+\bibitem{conneau2020xlmr}
+\BIBentryALTinterwordspacing
+A.~Conneau, K.~Khandelwal, N.~Goyal, V.~Chaudhary, G.~Wenzek, F.~Guzm{\'{a}}n,
+  E.~Grave, M.~Ott, L.~Zettlemoyer, and V.~Stoyanov, ``Unsupervised
+  cross-lingual representation learning at scale,'' in \emph{Proceedings of the
+  58th Annual Meeting of the Association for Computational Linguistics}.\hskip
+  1em plus 0.5em minus 0.4em\relax Association for Computational Linguistics,
+  2020, pp. 8440--8451. [Online]. Available:
+  \url{https://aclanthology.org/2020.acl-main.747/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{nguyen2020phobert}
+\BIBentryALTinterwordspacing
+D.~Q. Nguyen and A.~Tuan~Nguyen, ``{PhoBERT}: Pre-trained language models for
+  vietnamese,'' in \emph{Findings of the Association for Computational
+  Linguistics: EMNLP 2020}.\hskip 1em plus 0.5em minus 0.4em\relax Association
+  for Computational Linguistics, 2020, pp. 1037--1042. [Online]. Available:
+  \url{https://aclanthology.org/2020.findings-emnlp.92/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{nguyen2026bamibert}
+\BIBentryALTinterwordspacing
+D.~Q. Nguyen, T.~Pham, C.~Tran, and L.~T. Nguyen, ``{BamiBERT}: A new
+  {BERT}-based language model for vietnamese,'' 2026. [Online]. Available:
+  \url{https://arxiv.org/abs/2607.02259}
+\BIBentrySTDinterwordspacing
+
+\bibitem{clark2020electra}
+\BIBentryALTinterwordspacing
+K.~Clark, M.-T. Luong, Q.~V. Le, and C.~D. Manning, ``{ELECTRA}: Pre-training
+  text encoders as discriminators rather than generators,'' in
+  \emph{International Conference on Learning Representations}, 2020. [Online].
+  Available: \url{https://openreview.net/forum?id=r1xMH1BtvB}
+\BIBentrySTDinterwordspacing
+
+\bibitem{lafferty2001crf}
+\BIBentryALTinterwordspacing
+J.~Lafferty, A.~McCallum, and F.~C.~N. Pereira, ``Conditional random fields:
+  Probabilistic models for segmenting and labeling sequence data,'' in
+  \emph{Proceedings of the Eighteenth International Conference on Machine
+  Learning}.\hskip 1em plus 0.5em minus 0.4em\relax Morgan Kaufmann, 2001, pp.
+  282--289. [Online]. Available:
+  \url{https://www.cs.columbia.edu/~jebara/6772/papers/crf.pdf}
+\BIBentrySTDinterwordspacing
+
+\bibitem{khosla2020supcon}
+\BIBentryALTinterwordspacing
+P.~Khosla, P.~Teterwak, C.~Wang, A.~Sarna, Y.~Tian, P.~Isola, A.~Maschinot,
+  C.~Liu, and D.~Krishnan, ``Supervised contrastive learning,'' in
+  \emph{Advances in Neural Information Processing Systems}, vol.~33, 2020, pp.
+  18\,661--18\,673. [Online]. Available:
+  \url{https://papers.neurips.cc/paper_files/paper/2020/hash/d89a66c7c80a29b1bdbab0f2a1a94af8-Abstract.html}
+\BIBentrySTDinterwordspacing
+
+\bibitem{das2022container}
+\BIBentryALTinterwordspacing
+S.~S.~S. Das, A.~Katiyar, R.~Passonneau, and R.~Zhang, ``{CONTaiNER}: Few-shot
+  named entity recognition via contrastive learning,'' in \emph{Proceedings of
+  the 60th Annual Meeting of the Association for Computational Linguistics
+  (Volume 1: Long Papers)}.\hskip 1em plus 0.5em minus 0.4em\relax Association
+  for Computational Linguistics, 2022, pp. 6338--6353. [Online]. Available:
+  \url{https://aclanthology.org/2022.acl-long.439/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{si2022sclrai}
+\BIBentryALTinterwordspacing
+S.~Si, S.~Zeng, J.~Lin, and B.~Chang, ``{SCL-RAI}: Span-based contrastive
+  learning with retrieval augmented inference for unlabeled entity problem in
+  {NER},'' in \emph{Proceedings of the 29th International Conference on
+  Computational Linguistics}.\hskip 1em plus 0.5em minus 0.4em\relax
+  International Committee on Computational Linguistics, 2022, pp. 2313--2318.
+  [Online]. Available: \url{https://aclanthology.org/2022.coling-1.202/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{guo2025baner}
+\BIBentryALTinterwordspacing
+Q.~Guo, Y.~Dong, L.~Tian, Z.~Kang, Y.~Zhang, and S.~Wang, ``{BANER}:
+  Boundary-aware {LLM}s for few-shot named entity recognition,'' in
+  \emph{Proceedings of the 31st International Conference on Computational
+  Linguistics}.\hskip 1em plus 0.5em minus 0.4em\relax Association for
+  Computational Linguistics, 2025, pp. 10\,375--10\,389. [Online]. Available:
+  \url{https://aclanthology.org/2025.coling-main.691/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{yang2026cuamner}
+\BIBentryALTinterwordspacing
+X.~Yang, R.~Zhao, and H.~Li, ``A contrastive and uncertainty-aware framework
+  for multimodal named entity recognition,'' \emph{Electronics}, vol.~15,
+  no.~13, p. 2770, 2026. [Online]. Available:
+  \url{https://www.mdpi.com/2079-9292/15/13/2770}
+\BIBentrySTDinterwordspacing
+
+\bibitem{la2025papnerdata}
+\BIBentryALTinterwordspacing
+D.-D. La, T.-B. Tran, N.-H. Du, N.-H. Dang, T.-N. Phung, and V.-K. Tran,
+  ``{PAP\_NER} dataset,'' 2025. [Online]. Available:
+  \url{https://doi.org/10.5281/zenodo.18044019}
+\BIBentrySTDinterwordspacing
+
+\bibitem{nakayama2018seqeval}
+\BIBentryALTinterwordspacing
+H.~Nakayama, ``{seqeval}: A python framework for sequence labeling
+  evaluation,'' 2018. [Online]. Available:
+  \url{https://github.com/chakki-works/seqeval}
+\BIBentrySTDinterwordspacing
+
+\end{thebibliography}
 
 \end{document}
