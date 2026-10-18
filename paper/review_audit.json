@@ -1,0 +1,104 @@
+{
+  "audit_date": "2026-10-15",
+  "dataset_files": [
+    {
+      "path": "C:\\Main\\NCKH\\vbpl\\PhoBERT-Legal-NER\\Dataset\\dev_data.txt",
+      "sha256": "179cac1f1dfcf4c66abb9d6bfb71fca48d4057522504beedbb3a900cfeeacb2a",
+      "sentences": 10305,
+      "tokens": 245451,
+      "B_tag_counts": {
+        "CQ": 7186,
+        "NG": 3984,
+        "SL": 2024,
+        "VBPL": 867,
+        "ĐT": 7322
+      }
+    },
+    {
+      "path": "C:\\Main\\NCKH\\vbpl\\PhoBERT-Legal-NER\\Dataset\\test_data.txt",
+      "sha256": "adb803f572a157501f9152e75648d1380884e4ba11d1479b7504dce5b621e11a",
+      "sentences": 10278,
+      "tokens": 243616,
+      "B_tag_counts": {
+        "CQ": 7311,
+        "NG": 4021,
+        "SL": 1638,
+        "VBPL": 828,
+        "ĐT": 7179
+      }
+    },
+    {
+      "path": "C:\\Main\\NCKH\\vbpl\\PhoBERT-Legal-NER\\Dataset\\train_data.txt",
+      "sha256": "c03c24fda3c23f17aff2e4e5d3f83ef545bc5abbf0d98f82b0e107db0a530a1c",
+      "sentences": 142218,
+      "tokens": 3222134,
+      "B_tag_counts": {
+        "CQ": 48418,
+        "NG": 27642,
+        "SL": 11060,
+        "VBPL": 23827,
+        "ĐT": 52500
+      }
+    }
+  ],
+  "verified_result_logs": [
+    {
+      "path": "C:\\Main\\NCKH\\vbpl\\Vietnamese-RAG\\logs_contrastive\\BamiBERT\\14Oct.log",
+      "sha256": "90fe33f7dea3fc755c6ae2295360806ab87a3dc3b19f91d93621ad30133752fc",
+      "samples": 5162,
+      "tokens": 117462,
+      "gold_entities": 6336,
+      "predicted_entities": 6394,
+      "TP": 6268,
+      "FP": 126,
+      "FN": 68,
+      "precision_percent": 98.0294025649046,
+      "recall_percent": 98.92676767676768,
+      "f1_percent": 98.47604084838963
+    },
+    {
+      "path": "C:\\Main\\NCKH\\vbpl\\Vietnamese-RAG\\logs_contrastive\\PhoBERT-V2\\14Oct.log",
+      "sha256": "03ef510d5a98b68ce01d151a46e8a102dea1b4e958d9c1c3754bfa23cd67f868",
+      "samples": 10278,
+      "tokens": 243616,
+      "gold_entities": 20979,
+      "predicted_entities": 20672,
+      "TP": 20393,
+      "FP": 279,
+      "FN": 586,
+      "precision_percent": 98.65034829721363,
+      "recall_percent": 97.20673054006387,
+      "f1_percent": 97.92321913039302
+    },
+    {
+      "path": "C:\\Main\\NCKH\\vbpl\\Vietnamese-RAG\\logs_contrastive\\XLM-R\\14Oct.log",
+      "sha256": "86f0378a28524340a6409d3070fac84c5cc6ecd6dee968e160cc84dbd3da168c",
+      "samples": 10278,
+      "tokens": 243616,
+      "gold_entities": 20979,
+      "predicted_entities": 20717,
+      "TP": 20280,
+      "FP": 437,
+      "FN": 699,
+      "precision_percent": 97.89062122894241,
+      "recall_percent": 96.66809666809667,
+      "f1_percent": 97.27551803530315
+    }
+  ],
+  "unverified_rows": [
+    "PhoBERT V2 + CRF",
+    "ELECTRA + CRF-H-SupCon"
+  ],
+  "source_checks": {
+    "unique_labels": 29,
+    "references_resolved": true,
+    "citation_keys_resolved": true,
+    "environments_balanced": true
+  },
+  "pdf_checks": {
+    "pdf_pages": 6,
+    "undefined_references": false,
+    "overfull_boxes": false,
+    "pdf_has_unknown_reference": false
+  }
+}
